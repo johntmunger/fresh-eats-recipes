@@ -15,9 +15,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,vue}\"",
     "lint": "eslint \"src/**/*.{ts,tsx,js,jsx,vue}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx,js,jsx,vue}\" --fix",
-    "prepare": "husky",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "changelog:reset": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
+    "prepare": "husky"
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",

@@ -1,5 +1,9 @@
 # Changelog
 
+> **⚠️ IMPORTANT: This changelog is manually maintained.**  
+> **Do NOT use automated changelog generation tools (conventional-changelog, etc.)**  
+> **Update this file manually to keep it clean and readable.**
+
 All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2025-12-10
