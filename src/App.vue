@@ -15,11 +15,9 @@ const backgroundImages = [
   "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1920&q=80", // Bright modern kitchen with natural light
   "https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=1920&q=80", // Light airy restaurant interior
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=80", // Bright white kitchen counter
-  "https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=1920&q=80", // Fresh produce and bright kitchen
   "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=1920&q=80", // Bright food prep area with ingredients
   "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?w=1920&q=80", // Bright chef's kitchen workspace
   "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1920&q=80", // Fresh vegetables and bright countertop
-  "https://images.unsplash.com/photo-1556910096-6f5e72db6803?w=1920&q=80", // Sunlit kitchen with wood accents
   "https://images.unsplash.com/photo-1505935428862-770b6f24f629?w=1920&q=80", // Minimal white plate with fresh ingredients
   "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1920&q=80", // Simple dish on white background
   "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1920&q=80", // Minimal salad ingredients on white surface
@@ -155,13 +153,30 @@ const saveRecipe = async (recipeName: string) => {
   error.value = null;
   try {
     const ingredientNames = ingredients.value.map((i) => i.name);
-    const newRecipe = await api.createRecipe(recipeName, ingredientNames);
-
-    // Update recipes list
-    recipes.value.unshift(newRecipe);
-
-    // Set as current recipe (will show with edit/delete options)
-    currentRecipe.value = newRecipe;
+    
+    // Check if we're updating an existing recipe
+    if (currentRecipe.value) {
+      // Update existing recipe
+      const updatedRecipe = await api.updateRecipe(currentRecipe.value.id, recipeName);
+      
+      // Update the recipe's ingredients in the database
+      // Delete old recipe_ingredients and add new ones
+      await api.deleteRecipe(currentRecipe.value.id);
+      const newRecipe = await api.createRecipe(recipeName, ingredientNames);
+      
+      // Update in recipes list
+      const index = recipes.value.findIndex((r) => r.id === currentRecipe.value!.id);
+      if (index !== -1) {
+        recipes.value[index] = newRecipe;
+      }
+      
+      currentRecipe.value = newRecipe;
+    } else {
+      // Create new recipe
+      const newRecipe = await api.createRecipe(recipeName, ingredientNames);
+      recipes.value.unshift(newRecipe);
+      currentRecipe.value = newRecipe;
+    }
 
     // Close modal
     showSaveModal.value = false;
@@ -286,13 +301,18 @@ const currentRecipeId = computed(() => {
 
 // No default ingredients anymore - always allow saving
 
-// Check if current ingredients match any existing recipe
+// Check if current ingredients match any existing recipe (excluding current recipe)
 const isDuplicateRecipe = computed(() => {
   if (ingredients.value.length === 0) return false;
 
   const currentIngredientNames = ingredients.value.map((i) => i.name.toLowerCase().trim()).sort();
 
   return recipes.value.some((recipe) => {
+    // Skip the current recipe - allow updating it
+    if (currentRecipe.value && recipe.id === currentRecipe.value.id) {
+      return false;
+    }
+    
     const recipeIngredientNames = recipe.ingredients.map((i) => i.toLowerCase().trim()).sort();
 
     if (currentIngredientNames.length !== recipeIngredientNames.length) return false;
