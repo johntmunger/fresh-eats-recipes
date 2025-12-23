@@ -91,7 +91,8 @@ onBeforeUnmount(() => {
         ref="inputRef"
         v-model="editValue"
         type="text"
-        class="w-full px-2 py-1 text-sm sm:text-base text-gray-900 bg-white border border-green-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        maxlength="25"
+        class="w-full px-2 py-1 text-base text-gray-900 bg-white border border-green-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
         @blur="handleBlur(ingredient.id)"
         @keydown="handleKeydown($event, ingredient.id)"
       />
