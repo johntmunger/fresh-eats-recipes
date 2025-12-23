@@ -91,12 +91,12 @@ router.post('/', (req, res) => {
 
 /**
  * PUT /api/recipes/:id
- * Update a recipe name
+ * Update a recipe name and/or ingredients
  */
 router.put('/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, ingredients } = req.body;
     
     const db = getDatabase();
     
@@ -106,13 +106,33 @@ router.put('/:id', (req, res) => {
       return res.status(404).json({ error: 'Recipe not found' });
     }
     
-    // Validate name
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    // Validate name if provided
+    if (name && (typeof name !== 'string' || name.trim().length === 0)) {
       return res.status(400).json({ error: 'Invalid recipe name' });
     }
     
-    const stmt = db.prepare('UPDATE recipes SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-    stmt.run(name.trim(), id);
+    // Update recipe name if provided
+    if (name) {
+      const stmt = db.prepare('UPDATE recipes SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+      stmt.run(name.trim(), id);
+    }
+    
+    // Update ingredients if provided
+    if (ingredients && Array.isArray(ingredients)) {
+      // Delete old ingredients
+      db.prepare('DELETE FROM recipe_ingredients WHERE recipe_id = ?').run(id);
+      
+      // Insert new ingredients
+      const ingredientStmt = db.prepare('INSERT INTO recipe_ingredients (recipe_id, ingredient_name) VALUES (?, ?)');
+      for (const ingredient of ingredients) {
+        if (ingredient && ingredient.trim()) {
+          ingredientStmt.run(id, ingredient.trim());
+        }
+      }
+      
+      // Update timestamp
+      db.prepare('UPDATE recipes SET updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(id);
+    }
     
     // Fetch updated recipe with ingredients
     const updatedRecipe = db.prepare('SELECT * FROM recipes WHERE id = ?').get(id);

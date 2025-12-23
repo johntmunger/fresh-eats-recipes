@@ -154,13 +154,29 @@ const saveRecipe = async (recipeName: string) => {
   error.value = null;
   try {
     const ingredientNames = ingredients.value.map((i) => i.name);
-    const newRecipe = await api.createRecipe(recipeName, ingredientNames);
-
-    // Update recipes list
-    recipes.value.unshift(newRecipe);
-
-    // Set as current recipe (will show with edit/delete options)
-    currentRecipe.value = newRecipe;
+    
+    // Check if we're updating an existing recipe
+    if (currentRecipe.value) {
+      // Update existing recipe (name and ingredients)
+      const updatedRecipe = await api.updateRecipe(
+        currentRecipe.value.id,
+        recipeName,
+        ingredientNames
+      );
+      
+      // Update in recipes list
+      const index = recipes.value.findIndex((r) => r.id === currentRecipe.value!.id);
+      if (index !== -1) {
+        recipes.value[index] = updatedRecipe;
+      }
+      
+      currentRecipe.value = updatedRecipe;
+    } else {
+      // Create new recipe
+      const newRecipe = await api.createRecipe(recipeName, ingredientNames);
+      recipes.value.unshift(newRecipe);
+      currentRecipe.value = newRecipe;
+    }
 
     // Close modal
     showSaveModal.value = false;

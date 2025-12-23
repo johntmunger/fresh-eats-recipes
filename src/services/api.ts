@@ -102,12 +102,16 @@ export async function createRecipe(name: string, ingredients: string[]): Promise
 }
 
 /**
- * Update a recipe name on the server
+ * Update a recipe name and/or ingredients on the server
  */
-export async function updateRecipe(id: number, name: string): Promise<Recipe> {
+export async function updateRecipe(
+  id: number, 
+  name: string, 
+  ingredients?: string[]
+): Promise<Recipe> {
   return fetchWithErrorHandling<Recipe>(`${API_BASE_URL}/recipes/${id}`, {
     method: "PUT",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, ingredients }),
   });
 }
 
