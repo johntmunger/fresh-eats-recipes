@@ -54,7 +54,7 @@ const handleKeydown = (event: KeyboardEvent, id: number) => {
 
 <template>
   <li
-    class="group flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gradient-to-r from-white/70 to-white/90 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl hover:shadow-green-500/20 hover:from-white/90 hover:to-white transition-all duration-300 border border-gray-200 hover:border-green-300 animate-slide-in-up hover:scale-[1.02] active:scale-[0.98]"
+    class="group flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gradient-to-r from-white/70 to-white/90 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl hover:shadow-gray-300/50 hover:from-white/90 hover:to-white transition-all duration-300 border border-gray-200 hover:border-green-300 animate-slide-in-up hover:scale-[1.02] active:scale-[0.98]"
   >
     <!-- Ingredient Icon -->
     <Icon

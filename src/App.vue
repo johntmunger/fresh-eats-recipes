@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import type { Ingredient, Recipe } from "./types/ingredient";
 import { Icon } from "@iconify/vue";
 import IngredientInput from "./components/IngredientInput.vue";
@@ -27,6 +27,7 @@ const showSaveModal = ref(false);
 const showDeleteConfirm = ref(false);
 const showRecipesDropdown = ref(false);
 const currentBackground = ref("");
+const hasUserInteracted = ref(false);
 
 // Select random background on mount
 onMounted(async () => {
@@ -75,6 +76,7 @@ const loadRecipes = async () => {
 };
 
 const addIngredient = async (name: string) => {
+  hasUserInteracted.value = true;
   error.value = null;
   try {
     const newIngredient = await api.createIngredient(name);
@@ -87,6 +89,7 @@ const addIngredient = async (name: string) => {
 };
 
 const updateIngredient = async (id: number, name: string) => {
+  hasUserInteracted.value = true;
   const ingredient = ingredients.value.find((i) => i.id === id);
   if (!ingredient) return;
 
@@ -104,6 +107,7 @@ const updateIngredient = async (id: number, name: string) => {
 };
 
 const deleteIngredient = async (id: number) => {
+  hasUserInteracted.value = true;
   const ingredientIndex = ingredients.value.findIndex((i) => i.id === id);
   if (ingredientIndex === -1) return;
 
@@ -220,8 +224,36 @@ const deleteCurrentRecipe = async () => {
 
 const ingredientCount = computed(() => ingredients.value.length);
 const recipeCount = computed(() => recipes.value.length);
-const currentRecipeName = computed(() => currentRecipe.value?.name || "Example Recipe");
-const currentRecipeId = computed(() => currentRecipe.value?.id || null);
+
+// Find matching recipe based on current ingredients
+const matchingRecipe = computed(() => {
+  if (ingredients.value.length === 0) return null;
+  
+  const currentIngredientNames = ingredients.value.map(i => i.name.toLowerCase().trim()).sort();
+  
+  return recipes.value.find(recipe => {
+    const recipeIngredientNames = recipe.ingredients.map(i => i.toLowerCase().trim()).sort();
+    
+    if (currentIngredientNames.length !== recipeIngredientNames.length) return false;
+    
+    return currentIngredientNames.every((name, index) => name === recipeIngredientNames[index]);
+  });
+});
+
+const currentRecipeName = computed(() => {
+  // If manually set current recipe, use that
+  if (currentRecipe.value) return currentRecipe.value.name;
+  // Otherwise check if ingredients match any saved recipe
+  if (matchingRecipe.value) return matchingRecipe.value.name;
+  // Default
+  return "Example Recipe";
+});
+
+const currentRecipeId = computed(() => {
+  if (currentRecipe.value) return currentRecipe.value.id;
+  if (matchingRecipe.value) return matchingRecipe.value.id;
+  return null;
+});
 
 // Default starter ingredients (should not be saved as recipe)
 const defaultIngredients = ['Tomatoes', 'Garlic', 'Olive Oil', 'Basil', 'Onions', 'Chicken Breast'];
@@ -258,6 +290,14 @@ const canSaveRecipe = computed(() => {
   return ingredientCount.value > 0 && !isDefaultIngredients.value && !isDuplicateRecipe.value;
 });
 
+// Watch for matching recipe and set it as current
+watch([ingredients, recipes], () => {
+  // Only auto-set if no manual recipe selection
+  if (!currentRecipe.value && matchingRecipe.value) {
+    currentRecipe.value = matchingRecipe.value;
+  }
+}, { immediate: true });
+
 const dismissError = () => {
   error.value = null;
 };
@@ -280,14 +320,16 @@ const dismissError = () => {
         <!-- Header -->
         <header class="mb-6 sm:mb-10">
           <div class="flex items-start gap-3 sm:gap-4">
-            <!-- Shopping Basket Logo SVG -->
-            <svg
-              class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-green-800 flex-shrink-0"
-              viewBox="0 0 64 64"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style="filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 2px 6px rgba(255, 255, 255, 0.3));"
-            >
+            <!-- Shopping Basket Logo SVG with Circle Border -->
+            <div class="relative flex-shrink-0">
+              <div class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-green-700 bg-white/40 backdrop-blur-sm flex items-center justify-center p-2">
+                <svg
+                  class="w-full h-full text-green-800"
+                  viewBox="0 0 64 64"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style="filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 2px 6px rgba(255, 255, 255, 0.3));"
+                >
               <!-- Basket handle -->
               <path
                 d="M20 18C20 18 20 10 32 10C44 10 44 18 44 18"
@@ -332,13 +374,15 @@ const dismissError = () => {
               <!-- Carrot -->
               <path d="M32 44L32 50" stroke="#f97316" stroke-width="3" stroke-linecap="round" opacity="0.8" />
               <path d="M32 43L31 41L33 41Z" fill="#22c55e" opacity="0.6" />
-            </svg>
+                </svg>
+              </div>
+            </div>
             <div class="flex-1">
               <h1
                 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-green-800 whitespace-nowrap"
                 style="text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(255, 255, 255, 0.3);"
               >
-                Inspiration Ingredients
+                Fresh & Fast Finds
               </h1>
               <p class="text-green-800 text-sm sm:text-base md:text-lg lg:text-xl flex items-center gap-2 font-medium whitespace-nowrap mt-1" style="text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(255, 255, 255, 0.3);">
                 <Icon icon="mdi:silverware-fork-knife" class="text-base sm:text-lg md:text-xl lg:text-2xl" />
@@ -448,20 +492,21 @@ const dismissError = () => {
                   </div>
                   </div>
                 
-                  <!-- Warning messages -->
-                  <div v-if="isDefaultIngredients" class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                  <!-- Warning messages - Only show after user interaction -->
+                  <div v-if="hasUserInteracted && isDefaultIngredients" class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
                     <Icon icon="mdi:information" class="text-blue-600 text-base flex-shrink-0" />
                     <span class="text-xs text-blue-700">Add or edit ingredients to save a new recipe</span>
                   </div>
-                  <div v-else-if="isDuplicateRecipe" class="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div v-else-if="hasUserInteracted && isDuplicateRecipe" class="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
                     <Icon icon="mdi:information" class="text-amber-600 text-base flex-shrink-0" />
                     <span class="text-xs text-amber-700">A recipe with these ingredients already exists</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Current Recipe Display -->
+              <!-- Current Recipe Display - Only show when there's a saved recipe match -->
               <CurrentRecipeDisplay
+                v-if="ingredients.length > 0 && (currentRecipe || matchingRecipe)"
                 :recipe-name="currentRecipeName"
                 :recipe-id="currentRecipeId"
                 @update-name="updateRecipeName"

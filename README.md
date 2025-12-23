@@ -1,4 +1,4 @@
-# Inspiration Ingredients
+# Fresh & Fast Finds
 
 Full-stack recipe and ingredient management application with Vue.js 3 frontend and Express.js backend, featuring SQLite database persistence.
 
