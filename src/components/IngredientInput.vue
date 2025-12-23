@@ -1,12 +1,21 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
+
+interface Props {
+  autoFocus?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  autoFocus: false
+});
 
 const emit = defineEmits<{
   addIngredient: [name: string];
 }>();
 
 const newIngredient = ref("");
+const inputRef = ref<HTMLInputElement | null>(null);
 
 const handleSubmit = () => {
   if (newIngredient.value.trim()) {
@@ -14,6 +23,12 @@ const handleSubmit = () => {
     newIngredient.value = "";
   }
 };
+
+onMounted(() => {
+  if (props.autoFocus && inputRef.value) {
+    inputRef.value.focus();
+  }
+});
 </script>
 
 <template>
@@ -21,6 +36,7 @@ const handleSubmit = () => {
     <div class="flex gap-3">
       <div class="flex-1 relative group">
         <input
+          ref="inputRef"
           v-model="newIngredient"
           type="text"
           placeholder="Add an ingredient..."

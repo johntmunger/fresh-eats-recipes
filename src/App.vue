@@ -413,7 +413,7 @@ const dismissError = () => {
 
             <!-- Content -->
             <template v-else>
-              <IngredientInput @add-ingredient="addIngredient" />
+              <IngredientInput :auto-focus="ingredients.length === 0 && recipes.length === 0" @add-ingredient="addIngredient" />
 
               <!-- Recipe Action Buttons (no stats) -->
               <div v-if="ingredients.length > 0 || recipes.length > 0" class="mb-6 sm:mb-8">
