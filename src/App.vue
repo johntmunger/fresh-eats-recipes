@@ -135,15 +135,19 @@ const saveRecipe = async (recipeName: string) => {
   try {
     const ingredientNames = ingredients.value.map((i) => i.name);
     const newRecipe = await api.createRecipe(recipeName, ingredientNames);
+    
+    // Update recipes list
     recipes.value.unshift(newRecipe);
+    
+    // Set as current recipe (will show with edit/delete options)
     currentRecipe.value = newRecipe;
+    
+    // Close modal
     showSaveModal.value = false;
     
-    // Clear current ingredients after saving
-    for (const ingredient of ingredients.value) {
-      await api.deleteIngredient(ingredient.id);
-    }
-    ingredients.value = [];
+    // Keep ingredients displayed so user can see the saved recipe
+    // Don't clear them - they can manually add more or delete items
+    hasUserInteracted.value = false; // Reset interaction flag to hide warnings
   } catch (err) {
     error.value = err instanceof api.ApiError ? err.message : "Failed to save recipe";
     console.error("Error saving recipe:", err);

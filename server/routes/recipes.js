@@ -47,6 +47,21 @@ router.post('/', (req, res) => {
     
     const db = getDatabase();
     
+    // Check for duplicate recipe (same ingredients)
+    const existingRecipes = db.prepare('SELECT * FROM recipes').all();
+    const sortedNewIngredients = ingredients.map(i => i.toLowerCase().trim()).sort();
+    
+    for (const recipe of existingRecipes) {
+      const recipeIngredients = db.prepare('SELECT ingredient_name FROM recipe_ingredients WHERE recipe_id = ?').all(recipe.id);
+      const sortedRecipeIngredients = recipeIngredients.map(ing => ing.ingredient_name.toLowerCase().trim()).sort();
+      
+      // Check if ingredients match
+      if (sortedNewIngredients.length === sortedRecipeIngredients.length &&
+          sortedNewIngredients.every((ing, idx) => ing === sortedRecipeIngredients[idx])) {
+        return res.status(409).json({ error: 'A recipe with these ingredients already exists' });
+      }
+    }
+    
     // Insert recipe
     const recipeStmt = db.prepare('INSERT INTO recipes (name) VALUES (?)');
     const result = recipeStmt.run(name.trim());
