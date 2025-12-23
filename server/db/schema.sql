@@ -1,13 +1,41 @@
--- Todos table schema
-CREATE TABLE IF NOT EXISTS todos (
+-- Ingredients table schema (current shopping list)
+CREATE TABLE IF NOT EXISTS ingredients (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  text TEXT NOT NULL,
-  completed INTEGER NOT NULL DEFAULT 0,
+  name TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create index for faster queries
-CREATE INDEX IF NOT EXISTS idx_completed ON todos(completed);
-CREATE INDEX IF NOT EXISTS idx_created_at ON todos(created_at);
+-- Recipes table schema (saved recipe collections)
+CREATE TABLE IF NOT EXISTS recipes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Recipe ingredients junction table
+CREATE TABLE IF NOT EXISTS recipe_ingredients (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  recipe_id INTEGER NOT NULL,
+  ingredient_name TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+);
+
+-- Create indexes for faster queries
+CREATE INDEX IF NOT EXISTS idx_ingredients_created_at ON ingredients(created_at);
+CREATE INDEX IF NOT EXISTS idx_recipes_created_at ON recipes(created_at);
+CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_recipe_id ON recipe_ingredients(recipe_id);
+
+-- Insert 6 starter ingredients (only if ingredients table is empty)
+INSERT INTO ingredients (name)
+SELECT * FROM (
+  SELECT 'Tomatoes' AS name UNION ALL
+  SELECT 'Garlic' UNION ALL
+  SELECT 'Olive Oil' UNION ALL
+  SELECT 'Basil' UNION ALL
+  SELECT 'Onions' UNION ALL
+  SELECT 'Chicken Breast'
+) WHERE NOT EXISTS (SELECT 1 FROM ingredients LIMIT 1);
 

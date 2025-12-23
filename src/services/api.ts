@@ -1,4 +1,4 @@
-import type { Todo } from "../types/todo";
+import type { Ingredient, Recipe } from "../types/ingredient";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
@@ -49,40 +49,73 @@ async function fetchWithErrorHandling<T>(url: string, options?: RequestInit): Pr
 }
 
 /**
- * Fetch all todos from the server
+ * Fetch all ingredients from the server
  */
-export async function fetchTodos(): Promise<Todo[]> {
-  return fetchWithErrorHandling<Todo[]>(`${API_BASE_URL}/todos`);
+export async function fetchIngredients(): Promise<Ingredient[]> {
+  return fetchWithErrorHandling<Ingredient[]>(`${API_BASE_URL}/ingredients`);
 }
 
 /**
- * Create a new todo on the server
+ * Create a new ingredient on the server
  */
-export async function createTodo(text: string): Promise<Todo> {
-  return fetchWithErrorHandling<Todo>(`${API_BASE_URL}/todos`, {
+export async function createIngredient(name: string): Promise<Ingredient> {
+  return fetchWithErrorHandling<Ingredient>(`${API_BASE_URL}/ingredients`, {
     method: "POST",
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ name }),
   });
 }
 
 /**
- * Update a todo on the server
+ * Update an ingredient on the server
  */
-export async function updateTodo(
-  id: number,
-  updates: Partial<Pick<Todo, "text" | "completed">>
-): Promise<Todo> {
-  return fetchWithErrorHandling<Todo>(`${API_BASE_URL}/todos/${id}`, {
+export async function updateIngredient(id: number, name: string): Promise<Ingredient> {
+  return fetchWithErrorHandling<Ingredient>(`${API_BASE_URL}/ingredients/${id}`, {
     method: "PUT",
-    body: JSON.stringify(updates),
+    body: JSON.stringify({ name }),
   });
 }
 
 /**
- * Delete a todo from the server
+ * Delete an ingredient from the server
  */
-export async function deleteTodo(id: number): Promise<void> {
-  return fetchWithErrorHandling<void>(`${API_BASE_URL}/todos/${id}`, {
+export async function deleteIngredient(id: number): Promise<void> {
+  return fetchWithErrorHandling<void>(`${API_BASE_URL}/ingredients/${id}`, {
+    method: "DELETE",
+  });
+}
+
+/**
+ * Fetch all recipes from the server
+ */
+export async function fetchRecipes(): Promise<Recipe[]> {
+  return fetchWithErrorHandling<Recipe[]>(`${API_BASE_URL}/recipes`);
+}
+
+/**
+ * Create a new recipe on the server
+ */
+export async function createRecipe(name: string, ingredients: string[]): Promise<Recipe> {
+  return fetchWithErrorHandling<Recipe>(`${API_BASE_URL}/recipes`, {
+    method: "POST",
+    body: JSON.stringify({ name, ingredients }),
+  });
+}
+
+/**
+ * Update a recipe name on the server
+ */
+export async function updateRecipe(id: number, name: string): Promise<Recipe> {
+  return fetchWithErrorHandling<Recipe>(`${API_BASE_URL}/recipes/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+}
+
+/**
+ * Delete a recipe from the server
+ */
+export async function deleteRecipe(id: number): Promise<void> {
+  return fetchWithErrorHandling<void>(`${API_BASE_URL}/recipes/${id}`, {
     method: "DELETE",
   });
 }

@@ -1,98 +1,263 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import type { Todo, FilterType } from "./types/todo";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import type { Ingredient, Recipe } from "./types/ingredient";
 import { Icon } from "@iconify/vue";
-import TodoInput from "./components/TodoInput.vue";
-import TodoList from "./components/TodoList.vue";
-import TodoFilters from "./components/TodoFilters.vue";
+import IngredientInput from "./components/IngredientInput.vue";
+import IngredientList from "./components/IngredientList.vue";
+import RecipeActions from "./components/RecipeActions.vue";
+import SaveRecipeModal from "./components/SaveRecipeModal.vue";
+import CurrentRecipeDisplay from "./components/CurrentRecipeDisplay.vue";
+import DeleteConfirmModal from "./components/DeleteConfirmModal.vue";
 import * as api from "./services/api";
 
-const todos = ref<Todo[]>([]);
-const currentFilter = ref<FilterType>("all");
+// Background images - bright kitchen/restaurant themed for light mode
+const backgroundImages = [
+  "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1920&q=80", // Bright modern kitchen with natural light
+  "https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=1920&q=80", // Light airy restaurant interior
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=80", // Bright white kitchen counter
+  "https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=1920&q=80", // Fresh produce and bright kitchen
+  "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=1920&q=80", // Bright food prep area with ingredients
+];
+
+const ingredients = ref<Ingredient[]>([]);
+const recipes = ref<Recipe[]>([]);
+const currentRecipe = ref<Recipe | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
+const showSaveModal = ref(false);
+const showDeleteConfirm = ref(false);
+const showRecipesDropdown = ref(false);
+const currentBackground = ref("");
 
-// Load todos from the server on mount
+// Select random background on mount
 onMounted(async () => {
-  await loadTodos();
+  currentBackground.value = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+  await Promise.all([loadIngredients(), loadRecipes()]);
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', handleClickOutside);
 });
 
-const loadTodos = async () => {
+// Close dropdown when clicking outside
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  // Check if click is outside the dropdown button and menu
+  if (!target.closest('.recipes-dropdown-container')) {
+    showRecipesDropdown.value = false;
+  }
+};
+
+// Cleanup event listener on unmount
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
+const loadIngredients = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    todos.value = await api.fetchTodos();
+    ingredients.value = await api.fetchIngredients();
   } catch (err) {
-    error.value = err instanceof api.ApiError ? err.message : "Failed to load todos";
-    console.error("Error loading todos:", err);
+    error.value = err instanceof api.ApiError ? err.message : "Failed to load ingredients";
+    console.error("Error loading ingredients:", err);
   } finally {
     isLoading.value = false;
   }
 };
 
-const addTodo = async (text: string) => {
+const loadRecipes = async () => {
   error.value = null;
   try {
-    const newTodo = await api.createTodo(text);
-    todos.value.unshift(newTodo); // Add to the beginning for newest-first
+    recipes.value = await api.fetchRecipes();
   } catch (err) {
-    error.value = err instanceof api.ApiError ? err.message : "Failed to add todo";
-    console.error("Error adding todo:", err);
-    throw err; // Re-throw so the input component can handle it
+    error.value = err instanceof api.ApiError ? err.message : "Failed to load recipes";
+    console.error("Error loading recipes:", err);
   }
 };
 
-const toggleTodo = async (id: number) => {
-  const todo = todos.value.find((t) => t.id === id);
-  if (!todo) return;
-
-  // Optimistic update
-  const previousCompleted = todo.completed;
-  todo.completed = !todo.completed;
-
+const addIngredient = async (name: string) => {
   error.value = null;
   try {
-    await api.updateTodo(id, { completed: todo.completed });
+    const newIngredient = await api.createIngredient(name);
+    ingredients.value.unshift(newIngredient);
   } catch (err) {
-    // Revert on error
-    todo.completed = previousCompleted;
-    error.value = err instanceof api.ApiError ? err.message : "Failed to update todo";
-    console.error("Error toggling todo:", err);
+    error.value = err instanceof api.ApiError ? err.message : "Failed to add ingredient";
+    console.error("Error adding ingredient:", err);
+    throw err;
   }
 };
 
-const deleteTodo = async (id: number) => {
-  // Optimistic update - store original in case we need to revert
-  const todoIndex = todos.value.findIndex((t) => t.id === id);
-  if (todoIndex === -1) return;
+const updateIngredient = async (id: number, name: string) => {
+  const ingredient = ingredients.value.find((i) => i.id === id);
+  if (!ingredient) return;
 
-  const deletedTodo = todos.value[todoIndex];
-  todos.value.splice(todoIndex, 1);
+  const previousName = ingredient.name;
+  ingredient.name = name;
 
   error.value = null;
   try {
-    await api.deleteTodo(id);
+    await api.updateIngredient(id, name);
   } catch (err) {
-    // Revert on error
-    todos.value.splice(todoIndex, 0, deletedTodo);
-    error.value = err instanceof api.ApiError ? err.message : "Failed to delete todo";
-    console.error("Error deleting todo:", err);
+    ingredient.name = previousName;
+    error.value = err instanceof api.ApiError ? err.message : "Failed to update ingredient";
+    console.error("Error updating ingredient:", err);
   }
 };
 
-const filteredTodos = computed(() => {
-  if (currentFilter.value === "completed") {
-    return todos.value.filter((t) => t.completed);
+const deleteIngredient = async (id: number) => {
+  const ingredientIndex = ingredients.value.findIndex((i) => i.id === id);
+  if (ingredientIndex === -1) return;
+
+  const deletedIngredient = ingredients.value[ingredientIndex];
+  ingredients.value.splice(ingredientIndex, 1);
+
+  error.value = null;
+  try {
+    await api.deleteIngredient(id);
+  } catch (err) {
+    ingredients.value.splice(ingredientIndex, 0, deletedIngredient);
+    error.value = err instanceof api.ApiError ? err.message : "Failed to delete ingredient";
+    console.error("Error deleting ingredient:", err);
   }
-  return todos.value;
+};
+
+const openSaveModal = () => {
+  if (ingredients.value.length > 0) {
+    showSaveModal.value = true;
+  }
+};
+
+const saveRecipe = async (recipeName: string) => {
+  error.value = null;
+  try {
+    const ingredientNames = ingredients.value.map((i) => i.name);
+    const newRecipe = await api.createRecipe(recipeName, ingredientNames);
+    recipes.value.unshift(newRecipe);
+    currentRecipe.value = newRecipe;
+    showSaveModal.value = false;
+    
+    // Clear current ingredients after saving
+    for (const ingredient of ingredients.value) {
+      await api.deleteIngredient(ingredient.id);
+    }
+    ingredients.value = [];
+  } catch (err) {
+    error.value = err instanceof api.ApiError ? err.message : "Failed to save recipe";
+    console.error("Error saving recipe:", err);
+  }
+};
+
+const loadRecipeIngredients = async (recipe: Recipe) => {
+  error.value = null;
+  try {
+    // Clear current ingredients
+    for (const ingredient of ingredients.value) {
+      await api.deleteIngredient(ingredient.id);
+    }
+    ingredients.value = [];
+    
+    // Add recipe ingredients
+    for (const ingredientName of recipe.ingredients) {
+      const newIngredient = await api.createIngredient(ingredientName);
+      ingredients.value.push(newIngredient);
+    }
+    
+    // Set current recipe
+    currentRecipe.value = recipe;
+  } catch (err) {
+    error.value = err instanceof api.ApiError ? err.message : "Failed to load recipe";
+    console.error("Error loading recipe:", err);
+  }
+};
+
+const updateRecipeName = async (newName: string) => {
+  if (!currentRecipe.value) return;
+  
+  error.value = null;
+  try {
+    // Update recipe in the database (we'll need to add this endpoint)
+    const updatedRecipe = await api.updateRecipe(currentRecipe.value.id, newName);
+    currentRecipe.value = updatedRecipe;
+    
+    // Update in recipes list
+    const index = recipes.value.findIndex(r => r.id === currentRecipe.value!.id);
+    if (index !== -1) {
+      recipes.value[index] = updatedRecipe;
+    }
+  } catch (err) {
+    error.value = err instanceof api.ApiError ? err.message : "Failed to update recipe name";
+    console.error("Error updating recipe:", err);
+  }
+};
+
+const confirmDeleteRecipe = () => {
+  showDeleteConfirm.value = true;
+};
+
+const deleteCurrentRecipe = async () => {
+  if (!currentRecipe.value) return;
+  
+  error.value = null;
+  try {
+    await api.deleteRecipe(currentRecipe.value.id);
+    
+    // Remove from recipes list
+    recipes.value = recipes.value.filter(r => r.id !== currentRecipe.value!.id);
+    
+    // Clear current recipe
+    currentRecipe.value = null;
+    showDeleteConfirm.value = false;
+    
+    // Clear current ingredients
+    for (const ingredient of ingredients.value) {
+      await api.deleteIngredient(ingredient.id);
+    }
+    ingredients.value = [];
+  } catch (err) {
+    error.value = err instanceof api.ApiError ? err.message : "Failed to delete recipe";
+    console.error("Error deleting recipe:", err);
+  }
+};
+
+const ingredientCount = computed(() => ingredients.value.length);
+const recipeCount = computed(() => recipes.value.length);
+const currentRecipeName = computed(() => currentRecipe.value?.name || "Example Recipe");
+const currentRecipeId = computed(() => currentRecipe.value?.id || null);
+
+// Default starter ingredients (should not be saved as recipe)
+const defaultIngredients = ['Tomatoes', 'Garlic', 'Olive Oil', 'Basil', 'Onions', 'Chicken Breast'];
+
+// Check if current ingredients are the default set
+const isDefaultIngredients = computed(() => {
+  if (ingredients.value.length === 0) return false;
+  
+  const currentNames = ingredients.value.map(i => i.name.toLowerCase().trim()).sort();
+  const defaultNames = defaultIngredients.map(i => i.toLowerCase().trim()).sort();
+  
+  if (currentNames.length !== defaultNames.length) return false;
+  
+  return currentNames.every((name, index) => name === defaultNames[index]);
 });
 
-const activeCount = computed(() => todos.value.filter((t) => !t.completed).length);
-const completedCount = computed(() => todos.value.filter((t) => t.completed).length);
+// Check if current ingredients match any existing recipe
+const isDuplicateRecipe = computed(() => {
+  if (ingredients.value.length === 0) return false;
+  
+  const currentIngredientNames = ingredients.value.map(i => i.name.toLowerCase().trim()).sort();
+  
+  return recipes.value.some(recipe => {
+    const recipeIngredientNames = recipe.ingredients.map(i => i.toLowerCase().trim()).sort();
+    
+    if (currentIngredientNames.length !== recipeIngredientNames.length) return false;
+    
+    return currentIngredientNames.every((name, index) => name === recipeIngredientNames[index]);
+  });
+});
 
-const setFilter = (filter: FilterType) => {
-  currentFilter.value = filter;
-};
+// Disable save button if default ingredients or duplicate
+const canSaveRecipe = computed(() => {
+  return ingredientCount.value > 0 && !isDefaultIngredients.value && !isDuplicateRecipe.value;
+});
 
 const dismissError = () => {
   error.value = null;
@@ -100,56 +265,102 @@ const dismissError = () => {
 </script>
 
 <template>
-  <div
-    class="min-h-screen bg-gradient-to-br from-gray-950 via-slate-900 to-gray-950 relative overflow-hidden"
-  >
-    <!-- Animated background elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden">
+    <!-- Background Image - No Transparency -->
+    <div class="absolute inset-0 overflow-hidden">
       <div
-        class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        :style="{ backgroundImage: `url(${currentBackground})` }"
       ></div>
-      <div
-        class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-        style="animation-delay: 1s"
-      ></div>
+      <!-- Gradient overlay for header readability only - fades to transparent -->
+      <div class="absolute inset-0 bg-gradient-to-b from-white/80 via-white/20 to-transparent" style="background: linear-gradient(to bottom, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.4) 20%, rgba(255,255,255,0) 50%)"></div>
     </div>
 
     <div class="relative z-10 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-2xl mx-auto">
-        <!-- Header with animation -->
-        <header class="text-center mb-6 sm:mb-10 animate-slide-in-down">
-          <div class="flex items-center justify-center gap-2 sm:gap-3 mb-3">
-            <Icon
-              icon="mdi:checkbox-marked-circle"
-              class="text-4xl sm:text-6xl text-blue-400 drop-shadow-lg animate-pulse"
-            />
-            <h1
-              class="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent animate-gradient"
+      <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <header class="mb-6 sm:mb-10">
+          <div class="flex items-start gap-3 sm:gap-4">
+            <!-- Shopping Basket Logo SVG -->
+            <svg
+              class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-green-800 flex-shrink-0"
+              viewBox="0 0 64 64"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style="filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 2px 6px rgba(255, 255, 255, 0.3));"
             >
-              Todo App
-            </h1>
+              <!-- Basket handle -->
+              <path
+                d="M20 18C20 18 20 10 32 10C44 10 44 18 44 18"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                fill="none"
+              />
+              
+              <!-- Basket body -->
+              <path
+                d="M12 24L16 52C16 54 18 56 20 56H44C46 56 48 54 48 52L52 24H12Z"
+                fill="currentColor"
+                opacity="0.9"
+              />
+              
+              <!-- Basket top rim -->
+              <rect
+                x="10"
+                y="22"
+                width="44"
+                height="4"
+                rx="1"
+                fill="currentColor"
+              />
+              
+              <!-- Basket weave lines -->
+              <line x1="20" y1="28" x2="18" y2="52" stroke="white" stroke-width="1.5" opacity="0.3" />
+              <line x1="28" y1="28" x2="26" y2="52" stroke="white" stroke-width="1.5" opacity="0.3" />
+              <line x1="36" y1="28" x2="38" y2="52" stroke="white" stroke-width="1.5" opacity="0.3" />
+              <line x1="44" y1="28" x2="46" y2="52" stroke="white" stroke-width="1.5" opacity="0.3" />
+              
+              <!-- Vegetables in basket -->
+              <!-- Tomato -->
+              <circle cx="24" cy="38" r="5" fill="#ef4444" opacity="0.8" />
+              <path d="M24 33L24 35" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" />
+              
+              <!-- Lettuce/Leafy green -->
+              <ellipse cx="38" cy="36" rx="6" ry="5" fill="#22c55e" opacity="0.7" />
+              <path d="M35 34C36 32 40 32 41 34" stroke="#16a34a" stroke-width="1" fill="none" />
+              
+              <!-- Carrot -->
+              <path d="M32 44L32 50" stroke="#f97316" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+              <path d="M32 43L31 41L33 41Z" fill="#22c55e" opacity="0.6" />
+            </svg>
+            <div class="flex-1">
+              <h1
+                class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-green-800 whitespace-nowrap"
+                style="text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(255, 255, 255, 0.3);"
+              >
+                Inspiration Ingredients
+              </h1>
+              <p class="text-green-800 text-sm sm:text-base md:text-lg lg:text-xl flex items-center gap-2 font-medium whitespace-nowrap mt-1" style="text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(255, 255, 255, 0.3);">
+                <Icon icon="mdi:silverware-fork-knife" class="text-base sm:text-lg md:text-xl lg:text-2xl" />
+                <span>Shop, prep and go cook!</span>
+              </p>
+            </div>
           </div>
-          <p
-            class="text-gray-300 text-sm sm:text-base flex items-center justify-center gap-2 opacity-90"
-          >
-            <Icon icon="mdi:target" class="text-base sm:text-lg" />
-            <span class="hidden sm:inline">Stay organized, get things done</span>
-            <span class="sm:hidden">Stay organized</span>
-          </p>
         </header>
 
         <!-- Error Message -->
         <div
           v-if="error"
-          class="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-xl backdrop-blur-sm animate-slide-in-down"
+          class="mb-4 p-4 bg-red-50 border border-red-300 rounded-xl backdrop-blur-sm animate-slide-in-down shadow-lg"
         >
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-              <Icon icon="mdi:alert-circle" class="text-red-400 text-xl" />
-              <span class="text-red-300 text-sm">{{ error }}</span>
+              <Icon icon="mdi:alert-circle" class="text-red-600 text-xl" />
+              <span class="text-red-700 text-sm">{{ error }}</span>
             </div>
             <button
-              class="text-red-400 hover:text-red-300 transition-colors"
+              class="text-red-600 hover:text-red-700 transition-colors"
               aria-label="Dismiss error"
               @click="dismissError"
             >
@@ -160,49 +371,191 @@ const dismissError = () => {
 
         <!-- Main card with glass morphism -->
         <div
-          class="bg-gray-800/60 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-700/50 overflow-hidden animate-scale-in"
+          class="bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-200/50 overflow-hidden animate-scale-in"
         >
-          <!-- Glow effect -->
-          <div
-            class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 pointer-events-none"
-          ></div>
 
           <div class="relative p-4 sm:p-6 md:p-8">
             <!-- Loading State -->
             <div v-if="isLoading" class="text-center py-12">
-              <Icon icon="mdi:loading" class="text-6xl text-blue-400 animate-spin mx-auto mb-4" />
-              <p class="text-gray-400">Loading todos...</p>
+              <Icon icon="mdi:loading" class="text-6xl text-green-600 animate-spin mx-auto mb-4" />
+              <p class="text-gray-600">Loading ingredients...</p>
             </div>
 
             <!-- Content -->
             <template v-else>
-              <TodoInput @add-todo="addTodo" />
+              <IngredientInput @add-ingredient="addIngredient" />
 
-              <TodoList :todos="filteredTodos" @toggle="toggleTodo" @delete="deleteTodo" />
+              <!-- Recipe Action Buttons (no stats) -->
+              <div v-if="ingredients.length > 0 || recipes.length > 0" class="mb-6 sm:mb-8">
+                <div class="flex flex-col gap-2">
+                  <div class="flex gap-2">
+                    <button
+                      class="px-3 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm border bg-gradient-to-r from-green-600 to-emerald-600 text-white border-green-500 hover:from-green-700 hover:to-emerald-700 hover:scale-105 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                      :disabled="!canSaveRecipe"
+                      :title="isDefaultIngredients ? 'Add or edit ingredients to save a recipe' : isDuplicateRecipe ? 'Recipe with these ingredients already exists' : 'Save current ingredients as a recipe'"
+                      @click="openSaveModal"
+                    >
+                      <Icon icon="mdi:content-save" class="text-base sm:text-xl flex-shrink-0" />
+                      <span>Save Recipe</span>
+                    </button>
 
-              <TodoFilters
-                v-if="todos.length > 0"
-                :current-filter="currentFilter"
-                :active-count="activeCount"
-                :completed-count="completedCount"
-                @filter-change="setFilter"
+                  <!-- Saved Recipes Dropdown -->
+                  <div class="relative recipes-dropdown-container">
+                    <button
+                      class="px-3 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm border text-gray-700 bg-white/70 border-gray-300 hover:bg-white hover:border-gray-400 hover:text-gray-900 hover:scale-105 whitespace-nowrap"
+                      @click="showRecipesDropdown = !showRecipesDropdown"
+                    >
+                      <Icon icon="mdi:book-open-variant" class="text-base sm:text-xl flex-shrink-0" />
+                      <span>Saved Recipes</span>
+                      <Icon
+                        icon="mdi:chevron-down"
+                        class="text-base sm:text-xl transition-transform duration-300 flex-shrink-0"
+                        :class="{ 'rotate-180': showRecipesDropdown }"
+                      />
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <Transition name="dropdown">
+                      <div
+                        v-if="showRecipesDropdown && recipes.length > 0"
+                        class="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-10 max-h-80 overflow-y-auto"
+                      >
+                        <button
+                          v-for="recipe in recipes"
+                          :key="recipe.id"
+                          class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0 flex items-center gap-3"
+                          @click="
+                            loadRecipeIngredients(recipe);
+                            showRecipesDropdown = false;
+                          "
+                        >
+                          <Icon icon="mdi:chef-hat" class="text-xl text-green-600 flex-shrink-0" />
+                          <div class="flex-1 min-w-0">
+                            <div class="text-sm font-semibold text-gray-900 truncate">{{ recipe.name }}</div>
+                            <div class="text-xs text-gray-600">
+                              {{ recipe.ingredients.length }}
+                              {{ recipe.ingredients.length === 1 ? "ingredient" : "ingredients" }}
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                      <div
+                        v-else-if="showRecipesDropdown && recipes.length === 0"
+                        class="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 z-10"
+                      >
+                        <p class="text-sm text-gray-600 text-center">No saved recipes yet</p>
+                      </div>
+                    </Transition>
+                  </div>
+                  </div>
+                
+                  <!-- Warning messages -->
+                  <div v-if="isDefaultIngredients" class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <Icon icon="mdi:information" class="text-blue-600 text-base flex-shrink-0" />
+                    <span class="text-xs text-blue-700">Add or edit ingredients to save a new recipe</span>
+                  </div>
+                  <div v-else-if="isDuplicateRecipe" class="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <Icon icon="mdi:information" class="text-amber-600 text-base flex-shrink-0" />
+                    <span class="text-xs text-amber-700">A recipe with these ingredients already exists</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Current Recipe Display -->
+              <CurrentRecipeDisplay
+                :recipe-name="currentRecipeName"
+                :recipe-id="currentRecipeId"
+                @update-name="updateRecipeName"
+                @delete-recipe="confirmDeleteRecipe"
               />
+
+              <IngredientList
+                :ingredients="ingredients"
+                @update="updateIngredient"
+                @delete="deleteIngredient"
+              />
+
+              <!-- Stats at bottom -->
+              <div v-if="ingredients.length > 0 || recipes.length > 0" class="pt-4 sm:pt-6 border-t border-gray-200">
+                <div class="flex items-center justify-between px-2 text-xs sm:text-sm">
+                  <div class="flex items-center gap-2 group">
+                    <div class="relative">
+                      <Icon
+                        icon="mdi:shopping"
+                        class="text-base sm:text-lg text-green-600 group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div
+                        class="absolute inset-0 blur-md bg-green-600/10 group-hover:bg-green-600/20 transition-all duration-300"
+                      ></div>
+                    </div>
+                    <span
+                      class="font-semibold text-gray-700 group-hover:text-gray-900 transition-colors duration-300"
+                    >
+                      <span class="text-green-600 text-base sm:text-lg">{{ ingredientCount }}</span>
+                      <span class="hidden sm:inline ml-1">
+                        {{ ingredientCount === 1 ? "ingredient" : "ingredients" }}
+                      </span>
+                      <span class="sm:hidden ml-1">items</span>
+                    </span>
+                  </div>
+
+                  <div class="flex items-center gap-2 group">
+                    <span
+                      class="font-semibold text-gray-700 group-hover:text-gray-900 transition-colors duration-300"
+                    >
+                      <span class="text-emerald-600 text-base sm:text-lg">{{ recipeCount }}</span>
+                      <span class="hidden sm:inline ml-1">
+                        {{ recipeCount === 1 ? "recipe saved" : "recipes saved" }}
+                      </span>
+                      <span class="sm:hidden ml-1">saved</span>
+                    </span>
+                    <div class="relative">
+                      <Icon
+                        icon="mdi:chef-hat"
+                        class="text-base sm:text-lg text-emerald-600 group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div
+                        class="absolute inset-0 blur-md bg-emerald-600/10 group-hover:bg-emerald-600/20 transition-all duration-300"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </template>
           </div>
         </div>
 
-        <!-- Footer with animation -->
-        <footer
-          class="text-center mt-6 sm:mt-10 text-gray-400 text-xs sm:text-sm animate-slide-in-up opacity-80"
-        >
-          <p class="flex flex-wrap items-center justify-center gap-2">
-            <Icon icon="mdi:vuejs" class="text-base sm:text-lg text-green-500" />
-            <span class="hidden sm:inline">Built with Vue 3, TypeScript, and Tailwind CSS</span>
-            <span class="sm:hidden">Vue 3 • TypeScript • Tailwind</span>
-            <Icon icon="mdi:tailwind" class="text-base sm:text-lg text-cyan-400" />
-          </p>
-        </footer>
       </div>
     </div>
+
+    <!-- Save Recipe Modal -->
+    <SaveRecipeModal
+      :is-open="showSaveModal"
+      :ingredients="ingredients.map((i) => i.name)"
+      @close="showSaveModal = false"
+      @save="saveRecipe"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <DeleteConfirmModal
+      :is-open="showDeleteConfirm"
+      :recipe-name="currentRecipeName"
+      @close="showDeleteConfirm = false"
+      @confirm="deleteCurrentRecipe"
+    />
   </div>
 </template>
+
+<style>
+/* Dropdown animation */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>

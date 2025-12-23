@@ -1,35 +1,45 @@
-# Vuejs 3 Modern Todo App
+# Inspiration Ingredients
 
-Full-stack todo application with Vuejs 3 frontend and Express.js backend, featuring SQLite database persistence.
+Full-stack recipe and ingredient management application with Vue.js 3 frontend and Express.js backend, featuring SQLite database persistence.
 
-## 🚀 <a href="https://vuejs-aidd-todo-app.onrender.com/" target="_blank" rel="noopener noreferrer">Live Demo</a>
+A beautiful, modern web app to manage your shopping ingredients and save your favorite recipe combinations.
 
-**Try it now:** <a href="https://vuejs-aidd-todo-app.onrender.com/" target="_blank" rel="noopener noreferrer">https://vuejs-aidd-todo-app.onrender.com/</a>
+## 🚀 Live Demo
 
-> **Note:** The app is hosted on Render's free tier and may take 30-60 seconds to wake up on first load.
+> **Note:** The app may be hosted on a free tier and may take 30-60 seconds to wake up on first load.
 
 ## Features
 
 ### Core Functionality
 
-- ✅ Add new todos with intuitive input
-- ✅ Mark todos as complete/incomplete with animated checkboxes
-- ✅ Delete todos with smooth fade-out animation
-- ✅ Filter todos (All, Completed) with visual feedback
-- 💾 **SQLite Database Persistence** - All todos saved to database
+- 🛒 **Ingredient Management** - Add, edit, and delete ingredients with inline editing
+- 📝 **Recipe Saving** - Save current ingredient combinations as named recipes
+- 💾 **Recipe Library** - Browse and load previously saved recipes
+- 🔄 **Smart Duplicate Detection** - Prevents saving duplicate recipes
+- 📊 **Live Statistics** - Track ingredient count and saved recipe count
+- 💾 **SQLite Database Persistence** - All data saved to database
 - 🔄 **RESTful API** - Express.js backend with proper error handling
 - ⚡ **Optimistic Updates** - Instant UI feedback with background sync
 
 ### Design & UX
 
-- 🎨 **Futuristic Dark Mode** - Sleek glass morphism design with gradient accents
+- ☀️ **Beautiful Light Mode** - Clean, modern design with prominent background imagery
+- 🖼️ **Dynamic Backgrounds** - Rotating collection of bright kitchen/restaurant images
 - 📱 **Mobile-First Responsive** - Optimized for all screen sizes from mobile to desktop
-- ✨ **Smooth Animations** - Fade, slide, and scale transitions throughout
+- ✨ **Smooth Animations** - Subtle transitions throughout the interface
 - 🎯 **Interactive Hover Effects** - Responsive feedback on all interactive elements
-- 🌟 **Ambient Background** - Animated gradient orbs for depth
-- 💫 **Micro-interactions** - Button rotations, icon scaling, glow effects
-- 🎭 **Glass Morphism** - Modern frosted glass aesthetic with backdrop blur
-- 🔮 **Gradient Accents** - Dynamic blue-to-purple color schemes
+- 💫 **Micro-interactions** - Button scaling, dropdown animations
+- 🌿 **Green Theme** - Fresh, natural color palette throughout
+- 🔍 **Smart Validation** - Intelligent prevention of saving default/duplicate recipes
+
+### User Experience
+
+- **Two-Column Layout** - Efficient ingredient display with space for more items
+- **Inline Editing** - Edit ingredients directly in place (save with Enter or blur)
+- **Modal Dialogs** - Beautiful save recipe and delete confirmation modals
+- **Click-Away Detection** - Dropdowns close when clicking outside
+- **Current Recipe Display** - Shows active recipe name with edit/delete options
+- **Helpful Messages** - Contextual feedback for user actions
 
 ### Technical Features
 
@@ -94,6 +104,8 @@ This will start:
 
 3. Open your browser and navigate to `http://localhost:5173`
 
+The app comes pre-loaded with 6 starter ingredients: Tomatoes, Garlic, Olive Oil, Basil, Onions, and Chicken Breast.
+
 ### Code Formatting & Linting
 
 This project is configured with **Prettier** and **ESLint** for automatic code formatting and linting:
@@ -127,88 +139,159 @@ npm run lint:fix
 - `eslint.config.js` - ESLint rules with TypeScript & Vue support
 - `.vscode/settings.json` - Editor settings for format-on-save
 
-#### Custom Commands
+## Usage Guide
 
-The `.claude/commands/` directory contains AI-assisted documentation. Ask Claude to use these commands:
+### Adding Ingredients
 
-- `@project-overview` - Complete project explanation and architecture
-- `@commits` - Conventional Commits user guide
-- `@changelog-architecture` - Technical system deep-dive
-- `@prettier` - Prettier setup guide
-- `@eslint` - ESLint configuration guide
+1. Type an ingredient name in the input field
+2. Click "Add Ingredient" (or press Enter)
+3. Ingredient appears in the two-column list below
 
-**Learn more:** See [.claude/commands/README.md](.claude/commands/README.md) for how to use Claude commands
+### Editing Ingredients
 
-## Commit Message Format
+1. Hover over an ingredient item
+2. Click the small pencil (edit) icon that appears
+3. Modify the text inline
+4. Press Enter or click away to save
 
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automatic changelog generation.
+### Deleting Ingredients
 
-### Format
+1. Hover over an ingredient item
+2. Click the small trash (delete) icon that appears
+3. Ingredient is removed immediately
+
+### Saving a Recipe
+
+1. Add or modify ingredients to your liking
+2. Click "Save Recipe" button (disabled for default starter ingredients)
+3. Enter a recipe name in the modal dialog
+4. Review the ingredient list
+5. Click "Save Recipe" to persist to database
+6. Ingredients are cleared after successful save
+
+### Loading Saved Recipes
+
+1. Click "Saved Recipes" button
+2. Dropdown menu appears with all saved recipes
+3. Click any recipe to load its ingredients
+4. Current ingredient list is replaced with recipe ingredients
+
+### Managing Recipes
+
+- **Edit Recipe Name**: Hover over recipe name, click pencil icon, edit inline
+- **Delete Recipe**: Hover over recipe name, click trash icon, confirm deletion
+
+## Project Structure
 
 ```
-<type>(<scope>): <subject>
+├── server/                  # Backend API
+│   ├── db/
+│   │   ├── init.js         # Database initialization
+│   │   ├── schema.sql      # Database schema (ingredients, recipes, recipe_ingredients)
+│   │   └── recipes.db      # SQLite database (auto-generated)
+│   ├── routes/
+│   │   ├── ingredients.js  # Ingredient CRUD endpoints
+│   │   └── recipes.js      # Recipe CRUD endpoints
+│   ├── index.js            # Express server setup
+│   └── README.md           # Backend documentation
+│
+├── src/                     # Frontend application
+│   ├── components/
+│   │   ├── IngredientInput.vue      # Input component for adding ingredients
+│   │   ├── IngredientItem.vue       # Individual ingredient with edit/delete
+│   │   ├── IngredientList.vue       # Two-column grid layout
+│   │   ├── CurrentRecipeDisplay.vue # Shows current recipe name
+│   │   ├── SaveRecipeModal.vue      # Modal for saving recipes
+│   │   └── DeleteConfirmModal.vue   # Confirmation for recipe deletion
+│   ├── services/
+│   │   └── api.ts          # API service layer
+│   ├── types/
+│   │   └── ingredient.ts   # TypeScript type definitions
+│   ├── App.vue             # Main app component
+│   ├── main.ts             # Application entry point
+│   └── style.css           # Tailwind CSS + custom animations
+│
+├── public/
+│   └── basket-icon.svg     # Shopping basket favicon
+│
+├── documentation/           # Project documentation
+├── vite.config.ts          # Vite configuration with proxy
+└── package.json            # Dependencies and scripts
 ```
 
-### Common Types
+## Component Overview
 
-- `feat` - New feature
-- `fix` - Bug fix
-- `docs` - Documentation changes
-- `style` - Code style changes (formatting)
-- `refactor` - Code refactoring
-- `perf` - Performance improvements
-- `test` - Test changes
-- `chore` - Build/tooling changes
+### IngredientInput
 
-### Examples
+- Clean input field with green focus states
+- Responsive "Add Ingredient" button (icon-only on mobile)
+- Mobile-optimized layout stays on one line
+- Hover effects and smooth transitions
 
-```bash
-# Feature
-git commit -m "feat(todos): add dark mode toggle"
+### IngredientItem
 
-# Bug fix
-git commit -m "fix(api): resolve database timeout"
+- Two-column grid display for efficient space usage
+- Inline editing with blur/Enter to save
+- Hover-revealed edit and delete icons (subtle secondary style)
+- Truncation for long ingredient names (hover to see full name)
+- Smooth animations on hover
 
-# Documentation
-git commit -m "docs(readme): update installation steps"
+### IngredientList
 
-# Dependency update
-git commit -m "chore(deps): upgrade vue to 3.5.14"
-```
+- Two-column responsive grid layout
+- Scrollable with custom styled scrollbar
+- Beautiful empty state with pulsing shopping icon
+- Optimized for touch interactions
 
-### Automatic Changelog
+### CurrentRecipeDisplay
 
-When you commit with conventional format:
+- Shows active recipe name or "Example Recipe" default
+- Inline editing for recipe names
+- Hover-revealed edit and delete icons
+- Integrates with delete confirmation modal
 
-1. Your commit is validated automatically
-2. Changelog is updated with your changes
-3. Changes are documented in `CHANGELOG.md`
+### SaveRecipeModal
 
-📖 **[Complete Commit Guide](.claude/commands/commits.md)** - Detailed documentation with examples and best practices
+- Beautiful modal dialog with recipe name input
+- Two-column preview of ingredients to be saved
+- Save and Cancel actions
+- Keyboard support (Enter to save, Escape to cancel)
 
-🏗️ **[System Architecture](.claude/commands/changelog-architecture.md)** - Technical deep-dive into how the automated changelog system works
+### DeleteConfirmModal
 
-### Alternative: Run Servers Separately
+- Confirmation dialog for recipe deletion
+- Shows recipe name being deleted
+- Warning that action cannot be undone
+- Cancel or Delete options
 
-**Backend only:**
+## Backend API
 
-```bash
-npm run dev:server
-```
+The backend provides a RESTful API for managing ingredients and recipes with SQLite persistence.
 
-**Frontend only:**
+### Endpoints
 
-```bash
-npm run dev:client
-```
+**Ingredients:**
+- `GET /api/ingredients` - Fetch all ingredients
+- `POST /api/ingredients` - Create a new ingredient
+- `PUT /api/ingredients/:id` - Update an ingredient name
+- `DELETE /api/ingredients/:id` - Delete an ingredient
 
-### Build for Production
+**Recipes:**
+- `GET /api/recipes` - Fetch all recipes with ingredients
+- `POST /api/recipes` - Create a new recipe with ingredients
+- `PUT /api/recipes/:id` - Update a recipe name
+- `DELETE /api/recipes/:id` - Delete a recipe (cascade deletes)
 
-```bash
-npm run build
-```
+**Health:**
+- `GET /api/health` - Health check endpoint
 
-The built files will be in the `dist` directory.
+### Database Schema
+
+The database consists of three tables:
+
+1. **ingredients** - Current shopping list items
+2. **recipes** - Saved recipe collections
+3. **recipe_ingredients** - Junction table linking recipes to ingredients
 
 ## Available Scripts
 
@@ -237,17 +320,64 @@ npm run changelog:reset  # Regenerate entire changelog
 npm start                # Start production server
 ```
 
+## Design System
+
+### Color Palette
+
+- **Primary**: Green (400-800) - Main actions and branding
+- **Secondary**: Emerald (400-600) - Complementary accents
+- **Success**: Green/Emerald - Saved states
+- **Warning**: Amber - Duplicate alerts
+- **Info**: Blue - Informational messages
+- **Danger**: Red - Delete actions
+- **Neutral**: Gray (100-900) - Text and backgrounds
+
+### Animation Principles
+
+- **Duration**: 200-300ms for most transitions
+- **Easing**: ease-out for natural motion
+- **Hover**: Scale (1.02-1.05) for interactive elements
+- **Active**: Scale (0.95-0.98) for pressed states
+- **Dropdown**: Slide animations for menus
+
+### Responsive Breakpoints
+
+- **Mobile**: < 640px (sm)
+- **Tablet**: 640px - 1024px (sm-lg)
+- **Desktop**: > 1024px (lg+)
+
+## Key Features Explained
+
+### Duplicate Prevention
+
+The app intelligently prevents saving duplicate recipes by:
+- Comparing ingredient lists (case-insensitive, sorted)
+- Blocking save action for default starter ingredients
+- Showing helpful messages when duplicates are detected
+
+### Smart Recipe Management
+
+- Loads recipe ingredients into current list
+- Tracks which recipe is currently active
+- Allows editing recipe names inline
+- Confirms before deleting entire recipes
+
+### Mobile Optimization
+
+- Icon-only buttons on small screens
+- Responsive text sizing
+- No text wrapping on any screen size
+- Touch-optimized interactions
+
 ## Deployment
 
-This app is ready to deploy to Render.com (free tier available) with full database persistence!
-
-📖 **[Complete Deployment Guide](documentation/DEPLOYMENT.md)** - Step-by-step instructions for deploying to Render.com
+This app is ready to deploy to platforms like Render.com with full database persistence.
 
 Quick deploy:
 
 1. Push code to GitHub
-2. Connect repository to Render.com
-3. Deploy automatically using the included `render.yaml` configuration
+2. Connect repository to your hosting platform
+3. Deploy using the included `render.yaml` configuration
 
 The app will be live at: `https://your-app-name.onrender.com`
 
@@ -257,156 +387,42 @@ The app will be live at: `https://your-app-name.onrender.com`
 npm run preview
 ```
 
-## Project Structure
+## Commit Message Format
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automatic changelog generation.
+
+### Format
 
 ```
-├── .claude/                 # Claude AI command documentation
-│   └── commands/
-│       ├── README.md                # Guide to using Claude commands
-│       ├── project-overview.md      # Complete project overview (@project-overview)
-│       ├── commits.md               # Conventional Commits guide (@commits)
-│       ├── changelog-architecture.md # System architecture (@changelog-architecture)
-│       ├── prettier.md              # Prettier setup (@prettier)
-│       ├── eslint.md                # ESLint configuration (@eslint)
-│       └── workflow-test-results.md # Test results documentation
-│
-├── .husky/                  # Git hooks (at repository root)
-│   ├── commit-msg          # Validate commit messages
-│   ├── post-commit         # Auto-update changelog
-│   └── prepare-commit-msg  # Commit message template
-│
-├── .vscode/                 # Editor configuration
-│   └── settings.json       # Format-on-save settings
-│
-├── server/                  # Backend API
-│   ├── db/
-│   │   ├── init.js         # Database initialization
-│   │   ├── schema.sql      # Database schema
-│   │   └── todos.db        # SQLite database (auto-generated)
-│   ├── routes/
-│   │   └── todos.js        # Todo CRUD endpoints
-│   ├── index.js            # Express server setup
-│   └── README.md           # Backend documentation
-│
-├── src/                     # Frontend application
-│   ├── components/
-│   │   ├── TodoInput.vue   # Input component for adding todos
-│   │   ├── TodoItem.vue    # Individual todo item component
-│   │   ├── TodoList.vue    # List container for todos
-│   │   └── TodoFilters.vue # Filter buttons component
-│   ├── services/
-│   │   └── api.ts          # API service layer
-│   ├── types/
-│   │   └── todo.ts         # TypeScript type definitions
-│   ├── App.vue             # Main app component
-│   ├── main.ts             # Application entry point
-│   └── style.css           # Tailwind CSS + custom animations
-│
-├── .commitlintrc.json       # Commit message validation rules
-├── .prettierrc              # Prettier configuration
-├── .prettierignore          # Prettier ignore patterns
-├── eslint.config.js         # ESLint configuration (flat config)
-├── CHANGELOG.md             # Manually maintained changelog
-├── documentation/           # Project documentation
-│   ├── DEPLOYMENT.md        # Deployment guide for Render.com
-│   └── QUICKSTART.md        # Quick start guide
-├── vite.config.ts           # Vite configuration with proxy
-└── package.json             # Dependencies and scripts
+<type>(<scope>): <subject>
 ```
 
-## Component Overview
+### Common Types
 
-### TodoInput
+- `feat` - New feature
+- `fix` - Bug fix
+- `docs` - Documentation changes
+- `style` - Code style changes (formatting)
+- `refactor` - Code refactoring
+- `perf` - Performance improvements
+- `test` - Test changes
+- `chore` - Build/tooling changes
 
-- Gradient-enhanced input field with glass morphism effect
-- Animated button with icon rotation on hover
-- Mobile-responsive layout (stacks vertically on small screens)
-- Focus glow effects and smooth transitions
+### Examples
 
-### TodoItem
+```bash
+# Feature
+git commit -m "feat(recipes): add duplicate detection"
 
-- Glass morphism card design with gradient backgrounds
-- Custom animated checkbox with completion effects
-- Hidden delete button (reveals on hover for cleaner UI)
-- Smooth scale animations on hover and click
-- Staggered entrance animations for list items
+# Bug fix
+git commit -m "fix(api): resolve ingredient update issue"
 
-### TodoList
+# Documentation
+git commit -m "docs(readme): update for recipe app refactoring"
 
-- Scrollable container with custom styled scrollbar
-- Staggered item animations with delay
-- Beautiful empty state with pulsing icon
-- Optimized for touch interactions on mobile
-
-### TodoFilters
-
-- Two-button filter system (All / Completed)
-- Responsive filter buttons (flexible on mobile, larger on desktop)
-- Live statistics with animated icon effects
-- Active state with gradient background and shadow glow
-- Smooth transition between filter states
-
-### App.vue
-
-- Animated background with floating gradient orbs
-- Glass morphism main container with backdrop blur
-- Responsive padding and spacing for all screen sizes
-- Entrance animations for all major sections
-- State management using Vue 3's Composition API:
-  - Reactive todo array synced with database
-  - Computed filtered todos
-  - CRUD operations with API integration
-  - Loading states and error handling
-  - Optimistic UI updates
-
-### API Service (api.ts)
-
-- Type-safe API calls with custom error handling
-- RESTful endpoint wrappers (GET, POST, PUT, DELETE)
-- Centralized fetch logic with error transformation
-- Environment-based API URL configuration
-
-## Backend API
-
-The backend provides a RESTful API for managing todos with SQLite persistence.
-
-### Endpoints
-
-- `GET /api/todos` - Fetch all todos
-- `POST /api/todos` - Create a new todo
-- `PUT /api/todos/:id` - Update a todo
-- `DELETE /api/todos/:id` - Delete a todo
-- `GET /api/health` - Health check endpoint
-
-### Full Backend Documentation
-
-For detailed backend documentation including database schema, API specifications, and deployment guides, see:
-
-📖 **[Backend API Documentation](server/README.md)**
-
-## Design System
-
-### Color Palette
-
-- **Primary**: Blue (400-700) - Main actions and focus states
-- **Secondary**: Purple (400-600) - Gradient accents
-- **Success**: Green/Emerald (400-600) - Completed states
-- **Danger**: Red (400-600) - Delete actions
-- **Neutral**: Gray (100-950) - Text and backgrounds
-
-### Animation Principles
-
-- **Duration**: 300ms for most transitions
-- **Easing**: ease-out for natural motion
-- **Hover**: Scale (1.02-1.1) for interactive elements
-- **Active**: Scale (0.95-0.98) for pressed states
-- **Entrance**: Slide + fade for new elements
-
-### Responsive Breakpoints
-
-- **Mobile**: < 640px (sm)
-- **Tablet**: 640px - 1024px (sm-lg)
-- **Desktop**: > 1024px (lg+)
+# Refactoring
+git commit -m "refactor(app): migrate from todo to recipe schema"
+```
 
 ## Changelog
 

@@ -3,7 +3,8 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { initDatabase } from './db/init.js';
-import todosRouter from './routes/todos.js';
+import ingredientsRouter from './routes/ingredients.js';
+import recipesRouter from './routes/recipes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,7 +27,8 @@ if (isProduction) {
 }
 
 // API Routes
-app.use('/api/todos', todosRouter);
+app.use('/api/ingredients', ingredientsRouter);
+app.use('/api/recipes', recipesRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -48,7 +50,7 @@ if (isProduction) {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
-  console.log(`📊 Database: ${path.join(__dirname, 'db', 'todos.db')}`);
+  console.log(`🍳 Database: ${path.join(__dirname, 'db', 'recipes.db')}`);
 });
 
 export default app;
