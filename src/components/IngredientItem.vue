@@ -15,6 +15,7 @@ const emit = defineEmits<{
 const isEditing = ref(false);
 const editValue = ref("");
 const inputRef = ref<HTMLInputElement | null>(null);
+const showActions = ref(false);
 
 const startEdit = (currentName: string) => {
   isEditing.value = true;
@@ -50,11 +51,16 @@ const handleKeydown = (event: KeyboardEvent, id: number) => {
     cancelEdit();
   }
 };
+
+const toggleActions = () => {
+  showActions.value = !showActions.value;
+};
 </script>
 
 <template>
   <li
     class="group flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gradient-to-r from-white/70 to-white/90 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl hover:shadow-gray-300/50 hover:from-white/90 hover:to-white transition-all duration-300 border border-gray-200 hover:border-green-300 animate-slide-in-up hover:scale-[1.02] active:scale-[0.98]"
+    @click="toggleActions"
   >
     <!-- Ingredient Icon -->
     <Icon
@@ -81,14 +87,17 @@ const handleKeydown = (event: KeyboardEvent, id: number) => {
       {{ ingredient.name }}
     </span>
 
-    <!-- Action Buttons - Smaller secondary style -->
-    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+    <!-- Action Buttons - Smaller secondary style, toggle on mobile click -->
+    <div
+      class="flex items-center gap-1 transition-opacity duration-300"
+      :class="showActions ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'"
+    >
       <button
         v-if="!isEditing"
         class="flex-shrink-0 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all duration-200"
         aria-label="Edit ingredient"
         title="Edit"
-        @click="startEdit(ingredient.name)"
+        @click.stop="startEdit(ingredient.name)"
       >
         <Icon icon="mdi:pencil" class="text-base" />
       </button>
@@ -96,7 +105,7 @@ const handleKeydown = (event: KeyboardEvent, id: number) => {
         class="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all duration-200"
         aria-label="Delete ingredient"
         title="Delete"
-        @click="emit('delete', ingredient.id)"
+        @click.stop="emit('delete', ingredient.id)"
       >
         <Icon icon="mdi:delete" class="text-base" />
       </button>

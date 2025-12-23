@@ -271,18 +271,21 @@ The backend provides a RESTful API for managing ingredients and recipes with SQL
 ### Endpoints
 
 **Ingredients:**
+
 - `GET /api/ingredients` - Fetch all ingredients
 - `POST /api/ingredients` - Create a new ingredient
 - `PUT /api/ingredients/:id` - Update an ingredient name
 - `DELETE /api/ingredients/:id` - Delete an ingredient
 
 **Recipes:**
+
 - `GET /api/recipes` - Fetch all recipes with ingredients
 - `POST /api/recipes` - Create a new recipe with ingredients
 - `PUT /api/recipes/:id` - Update a recipe name
 - `DELETE /api/recipes/:id` - Delete a recipe (cascade deletes)
 
 **Health:**
+
 - `GET /api/health` - Health check endpoint
 
 ### Database Schema
@@ -351,6 +354,7 @@ npm start                # Start production server
 ### Duplicate Prevention
 
 The app intelligently prevents saving duplicate recipes by:
+
 - Comparing ingredient lists (case-insensitive, sorted)
 - Blocking save action for default starter ingredients
 - Showing helpful messages when duplicates are detected
