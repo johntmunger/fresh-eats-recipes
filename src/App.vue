@@ -37,7 +37,6 @@ const showUnsavedChanges = ref(false);
 const currentBackground = ref("");
 const hasUserInteracted = ref(false);
 const hasUnsavedChanges = ref(false);
-const originalIngredients = ref<string[]>([]);
 
 // Select random background on mount
 onMounted(async () => {
