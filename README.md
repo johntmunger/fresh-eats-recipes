@@ -4,9 +4,11 @@ Full-stack recipe and ingredient management application with Vue.js 3 frontend a
 
 A beautiful, modern web app to manage your shopping ingredients and save your favorite recipe combinations.
 
-## 🚀 Live Demo
+## 🚀 <a href="https://fresh-finds-recipes.onrender.com/" target="_blank" rel="noopener noreferrer">Live Demo</a>
 
-> **Note:** The app may be hosted on a free tier and may take 30-60 seconds to wake up on first load.
+**Try it now:** <a href="https://fresh-finds-recipes.onrender.com/" target="_blank" rel="noopener noreferrer">https://fresh-finds-recipes.onrender.com/</a>
+
+> **Note:** The app is hosted on Render's free tier and may take 30-60 seconds to wake up on first load.
 
 ## Features
 
