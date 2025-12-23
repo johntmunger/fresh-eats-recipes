@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { Icon } from "@iconify/vue";
 
 interface Props {
   isOpen: boolean;
   ingredients: string[];
+  currentRecipeName?: string;
 }
 
 const props = defineProps<Props>();
@@ -15,6 +16,15 @@ const emit = defineEmits<{
 }>();
 
 const recipeName = ref("");
+
+// Watch for modal opening and pre-populate if current recipe exists
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen && props.currentRecipeName && props.currentRecipeName !== "Example Recipe") {
+    recipeName.value = props.currentRecipeName;
+  } else if (isOpen) {
+    recipeName.value = "";
+  }
+});
 
 const handleSave = () => {
   if (recipeName.value.trim()) {

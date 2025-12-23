@@ -109,7 +109,7 @@ const addIngredient = async (name: string) => {
 
 const updateIngredient = async (id: number, name: string) => {
   hasUserInteracted.value = true;
-  hasUnsavedChanges.value = true;
+  // Don't mark as unsaved for edits - only add/delete trigger save button
   const ingredient = ingredients.value.find((i) => i.id === id);
   if (!ingredient) return;
 
@@ -740,6 +740,7 @@ const dismissError = () => {
     <SaveRecipeModal
       :is-open="showSaveModal"
       :ingredients="ingredients.map((i) => i.name)"
+      :current-recipe-name="currentRecipe?.name"
       @close="showSaveModal = false"
       @save="saveRecipe"
     />
