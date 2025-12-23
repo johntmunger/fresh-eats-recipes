@@ -461,7 +461,7 @@ const dismissError = () => {
                   icon="mdi:silverware-fork-knife"
                   class="text-base sm:text-lg md:text-xl lg:text-2xl"
                 />
-                <span>Shop, prep and go cook!</span>
+                <span>Shop, prep and cook!</span>
               </p>
             </div>
           </div>
