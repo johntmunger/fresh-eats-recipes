@@ -40,10 +40,7 @@ onMounted(async () => {
   currentBackground.value = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
   await Promise.all([loadIngredients(), loadRecipes()]);
 
-  // Load the most recent recipe if exists and no ingredients
-  if (recipes.value.length > 0 && ingredients.value.length === 0) {
-    await loadRecipeIngredients(recipes.value[0]);
-  }
+  // Start with empty state - users can load recipes from dropdown if needed
 
   // Close dropdown when clicking outside
   document.addEventListener("click", handleClickOutside);
