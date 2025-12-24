@@ -6,20 +6,27 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Use persistent disk path in production (Render), local path in development
-const DB_DIR = process.env.NODE_ENV === 'production' 
-  ? '/opt/render/project/src/server/db'
-  : __dirname;
-
-// Ensure directory exists (for persistent disk)
-if (process.env.NODE_ENV === 'production') {
-  if (!fs.existsSync(DB_DIR)) {
-    fs.mkdirSync(DB_DIR, { recursive: true });
-  }
-}
-
-const DB_PATH = path.join(DB_DIR, 'recipes.db');
+// Database paths
+let DB_PATH;
 const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
+
+if (process.env.NODE_ENV === 'production') {
+  // Production: Use persistent disk mount path
+  const DISK_PATH = '/opt/render/project/src/server/db';
+  
+  // Create directory if it doesn't exist
+  if (!fs.existsSync(DISK_PATH)) {
+    console.log(`Creating disk directory: ${DISK_PATH}`);
+    fs.mkdirSync(DISK_PATH, { recursive: true });
+  }
+  
+  DB_PATH = path.join(DISK_PATH, 'recipes.db');
+  console.log(`🌐 Production mode - Using persistent disk: ${DB_PATH}`);
+} else {
+  // Development: Use local directory
+  DB_PATH = path.join(__dirname, 'recipes.db');
+  console.log(`💻 Development mode - Using local path: ${DB_PATH}`);
+}
 
 let db = null;
 
