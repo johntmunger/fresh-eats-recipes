@@ -633,9 +633,9 @@ const dismissError = () => {
                     </button>
                   </div>
 
-                  <!-- Warning messages - Only show after user interaction -->
+                  <!-- Warning messages - Only show after user interaction and when NOT editing a loaded recipe -->
                   <div
-                    v-if="hasUserInteracted && isDuplicateRecipe"
+                    v-if="hasUserInteracted && isDuplicateRecipe && !currentRecipe"
                     class="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg"
                   >
                     <Icon icon="mdi:information" class="text-amber-600 text-base flex-shrink-0" />
