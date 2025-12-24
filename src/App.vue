@@ -44,7 +44,7 @@ onMounted(async () => {
 
   // Always clear ingredients on app load to ensure fresh start
   if (ingredients.value.length > 0) {
-      // Clearing leftover ingredients from previous session
+    // Clearing leftover ingredients from previous session
     for (const ingredient of ingredients.value) {
       await api.deleteIngredient(ingredient.id);
     }
@@ -517,7 +517,7 @@ const dismissError = () => {
                     <!-- Saved Recipes Dropdown -->
                     <div class="relative recipes-dropdown-container">
                       <button
-                        class="px-3 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm border text-gray-700 bg-white/70 border-gray-300 hover:bg-white hover:border-gray-400 hover:text-gray-900 hover:scale-105 whitespace-nowrap"
+                        class="px-2 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm border text-gray-700 bg-white/70 border-gray-300 hover:bg-white hover:border-gray-400 hover:text-gray-900 hover:scale-105 whitespace-nowrap"
                         @click="showRecipesDropdown = !showRecipesDropdown"
                       >
                         <Icon
@@ -574,7 +574,7 @@ const dismissError = () => {
                     <!-- Save Recipe Button - Secondary style when no changes -->
                     <button
                       :class="[
-                        'px-3 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm border whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
+                        'px-2 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm border whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
                         hasUnsavedChanges
                           ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white border-green-500 hover:from-green-700 hover:to-emerald-700 hover:scale-105'
                           : 'text-gray-700 bg-white/70 border-gray-300 hover:bg-white hover:border-gray-400 hover:text-gray-900 hover:scale-105',
@@ -594,7 +594,7 @@ const dismissError = () => {
                     <!-- New Button - Only show when there are ingredients -->
                     <button
                       v-if="ingredients.length > 0"
-                      class="px-3 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm border text-gray-700 bg-white/70 border-gray-300 hover:bg-white hover:border-gray-400 hover:text-gray-900 hover:scale-105 whitespace-nowrap"
+                      class="px-2 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm border text-gray-700 bg-white/70 border-gray-300 hover:bg-white hover:border-gray-400 hover:text-gray-900 hover:scale-105 whitespace-nowrap"
                       @click="handleNewRecipe"
                     >
                       <Icon
