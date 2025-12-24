@@ -15,11 +15,8 @@ const backgroundImages = [
   "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1920&q=80", // Bright modern kitchen with natural light
   "https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=1920&q=80", // Light airy restaurant interior
   "https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=1920&q=80", // Fresh produce and bright kitchen
-  "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=1920&q=80", // Bright food prep area with ingredients
-  "https://images.unsplash.com/photo-1556910096-6f5e72db6803?w=1920&q=80", // Sunlit kitchen with wood accents
   "https://images.unsplash.com/photo-1505935428862-770b6f24f629?w=1920&q=80", // Minimal white plate with fresh ingredients
   "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1920&q=80", // Simple dish on white background
-  "https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=1920&q=80", // Minimal produce arrangement
 ];
 
 const ingredients = ref<Ingredient[]>([]);
