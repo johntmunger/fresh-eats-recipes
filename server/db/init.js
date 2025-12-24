@@ -7,19 +7,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Database paths
-let DB_PATH;
 const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
+let DB_PATH;
 
 if (process.env.NODE_ENV === 'production') {
-  // Production: Use persistent disk mount path
-  const DISK_PATH = '/opt/render/project/src/server/db';
-  
-  // Create directory if it doesn't exist
-  if (!fs.existsSync(DISK_PATH)) {
-    console.log(`Creating disk directory: ${DISK_PATH}`);
-    fs.mkdirSync(DISK_PATH, { recursive: true });
-  }
-  
+  // Production: Use persistent disk at /var/data
+  const DISK_PATH = '/var/data';
   DB_PATH = path.join(DISK_PATH, 'recipes.db');
   console.log(`🌐 Production mode - Using persistent disk: ${DB_PATH}`);
 } else {
