@@ -618,10 +618,10 @@ const dismissError = () => {
                       <span class="hidden max-[391px]:inline">Save</span>
                     </button>
 
-                    <!-- New Button - Only show when there are ingredients -->
+                    <!-- New Button - Only show when there are ingredients, always right-aligned -->
                     <button
                       v-if="ingredients.length > 0"
-                      class="max-[391px]:px-2 px-3 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm border text-gray-700 bg-white/70 border-gray-300 hover:bg-white hover:border-gray-400 hover:text-gray-900 hover:scale-105 whitespace-nowrap"
+                      class="max-[391px]:px-2 px-3 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm border text-gray-700 bg-white/70 border-gray-300 hover:bg-white hover:border-gray-400 hover:text-gray-900 hover:scale-105 whitespace-nowrap ml-auto"
                       aria-label="Start new recipe"
                       @click="handleNewRecipe"
                     >
